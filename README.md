@@ -20,9 +20,146 @@ O servidor estará disponível em `http://localhost:8080`
 - **RF06**: Criação de dívidas diretas
 - **RF07**: Listagem de dívidas
 - **RF08**: Pagamento de dívidas
-- **RF09**: Visualização de saldo devedor/credor
+- **R---
+
+### 👥 Sistema de Grupos (`/api/grupos`)
+
+O sistema de grupos facilita a divisão recorrente de contas entre pessoas próximas (casal, república, amigos próximos).
+
+#### **POST** `/api/grupos/criar/{criadorId}`
+Cria um novo grupo.
+
+**Request Body:**
+```json
+{
+  "nome": "República da Ana",
+  "descricao": "Grupo para dividir contas da república",
+  "membrosIniciais": [2, 3]
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "nome": "República da Ana",
+  "descricao": "Grupo para dividir contas da república",
+  "criador": {
+    "id": 1,
+    "nome": "Ana",
+    "email": "ana@email.com",
+    "chavePix": "ana@pix.com"
+  },
+  "membros": [
+    {
+      "id": 2,
+      "nome": "Bruno",
+      "email": "bruno@email.com",
+      "chavePix": "11987654321"
+    },
+    {
+      "id": 3,
+      "nome": "Carlos",
+      "email": "carlos@email.com",
+      "chavePix": "carlos@email.com"
+    }
+  ],
+  "dataCriacao": "2025-08-07T01:26:08.784924608",
+  "ativo": true,
+  "totalMembros": 2,
+  "totalContas": 0,
+  "usuarioECriador": true,
+  "usuarioEMembro": false
+}
+```
+
+#### **GET** `/api/grupos/usuario/{usuarioId}`
+Lista todos os grupos do usuário (criados ou onde é membro).
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "nome": "República da Ana",
+    "descricao": "Grupo para dividir contas da república",
+    "criador": {
+      "id": 1,
+      "nome": "Ana",
+      "email": "ana@email.com",
+      "chavePix": "ana@pix.com"
+    },
+    "membros": [...],
+    "dataCriacao": "2025-08-07T01:26:08.784924",
+    "ativo": true,
+    "totalMembros": 2,
+    "totalContas": 5,
+    "usuarioECriador": false,
+    "usuarioEMembro": true
+  }
+]
+```
+
+#### **GET** `/api/grupos/{grupoId}/usuario/{usuarioId}`
+Busca detalhes de um grupo específico.
+
+#### **PUT** `/api/grupos/{grupoId}/membros/{usuarioId}`
+Adiciona ou remove membros do grupo (apenas criador).
+
+**Request Body:**
+```json
+{
+  "usuarioIds": [4, 5],
+  "acao": "ADICIONAR"
+}
+```
+
+**Ações disponíveis:**
+- `ADICIONAR` - Adiciona novos membros
+- `REMOVER` - Remove membros existentes
+
+#### **DELETE** `/api/grupos/{grupoId}/desativar/{usuarioId}`
+Desativa um grupo (apenas criador).
+
+#### **DELETE** `/api/grupos/{grupoId}/sair/{usuarioId}`
+Remove usuário do grupo (membros podem sair, criador não).
+
+#### **GET** `/api/contas/grupo/{grupoId}`
+Lista contas associadas a um grupo.
+
+**Query Parameters:**
+- `paga` (opcional): `true` ou `false`
+
+### Regras de Negócio - Grupos
+
+- ✅ **Apenas amigos podem ser adicionados ao grupo**
+- ✅ **Criador tem controle total do grupo**
+- ✅ **Membros podem sair do grupo**
+- ✅ **Criador não pode sair (deve desativar ou transferir)**
+- ✅ **Grupos desativados mantêm histórico**
+- ✅ **Validação de permissões em todas as operações**
+
+### Funcionalidades do Sistema de Grupos
+
+✅ **Implementado e Testado:**
+- Criação de grupos com membros iniciais
+- Listagem de grupos do usuário
+- Busca detalhada de grupo
+- Adição/remoção de membros
+- Saída do grupo
+- Desativação de grupos
+- Associação de contas a grupos
+- Validações de amizade e permissões
+
+---
+
+### 👥 Sistema de Amizades (`/api/amizades`)**: Visualização de saldo devedor/credor
 - **RF10**: Histórico de transações
+- **RF11**: Sistema de amizades (solicitação, aceitação, listagem)
+- **RF12**: Bloqueio e remoção de amigos
 - **RF13**: Compras com múltiplos itens
+- **RF14**: Sistema de grupos para divisão recorrente
+- **RF15**: Gerenciamento de membros de grupos
 
 ## 🔗 Documentação das APIs
 
@@ -520,7 +657,158 @@ Remove uma compra (apenas se não finalizada).
 
 ---
 
-### 📈 Relatórios e Saldos
+### � Sistema de Amizades (`/api/amizades`)
+
+O sistema de amizades permite que usuários se conectem antes de compartilhar contas e dívidas.
+
+#### **POST** `/api/amizades/solicitar/{usuarioId}`
+Solicita amizade para outro usuário.
+
+**Request Body:**
+```json
+{
+  "convidadoId": 2,
+  "mensagem": "Vamos ser amigos!" // opcional
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "solicitanteId": 1,
+  "solicitante": {
+    "id": 1,
+    "nome": "Ana",
+    "email": "ana@email.com",
+    "chavePix": "ana@pix.com"
+  },
+  "convidadoId": 2,
+  "convidado": {
+    "id": 2,
+    "nome": "Bruno",
+    "email": "bruno@email.com",
+    "chavePix": "11987654321"
+  },
+  "status": "PENDENTE",
+  "dataSolicitacao": "2025-08-07T01:13:13.179514324",
+  "dataResposta": null,
+  "solicitacao": true
+}
+```
+
+#### **GET** `/api/amizades/pendentes/{usuarioId}`
+Lista convites de amizade pendentes recebidos pelo usuário.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "solicitanteId": 1,
+    "solicitante": {
+      "id": 1,
+      "nome": "Ana",
+      "email": "ana@email.com",
+      "chavePix": "ana@pix.com"
+    },
+    "convidadoId": 2,
+    "status": "PENDENTE",
+    "dataSolicitacao": "2025-08-07T01:13:13.179514",
+    "solicitacao": false
+  }
+]
+```
+
+#### **POST** `/api/amizades/{amizadeId}/aceitar/{usuarioId}`
+Aceita uma solicitação de amizade.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "solicitanteId": 1,
+  "solicitante": {
+    "id": 1,
+    "nome": "Ana",
+    "email": "ana@email.com",
+    "chavePix": "ana@pix.com"
+  },
+  "convidadoId": 2,
+  "convidado": {
+    "id": 2,
+    "nome": "Bruno",
+    "email": "bruno@email.com",
+    "chavePix": "11987654321"
+  },
+  "status": "ACEITA",
+  "dataSolicitacao": "2025-08-07T01:13:13.179514",
+  "dataResposta": "2025-08-07T01:13:19.661495469",
+  "solicitacao": false
+}
+```
+
+#### **POST** `/api/amizades/{amizadeId}/rejeitar/{usuarioId}`
+Rejeita uma solicitação de amizade.
+
+#### **GET** `/api/amizades/usuario/{usuarioId}`
+Lista todos os amigos de um usuário.
+
+**Response:**
+```json
+[
+  {
+    "id": 2,
+    "nome": "Bruno",
+    "email": "bruno@email.com",
+    "chavePix": "11987654321"
+  }
+]
+```
+
+#### **GET** `/api/amizades/verificar/{usuario1Id}/{usuario2Id}`
+Verifica se dois usuários são amigos.
+
+**Response:**
+```json
+{
+  "saoAmigos": true
+}
+```
+
+#### **DELETE** `/api/amizades/remover/{usuario1Id}/{usuario2Id}`
+Remove amizade entre dois usuários.
+
+**Response:** `204 No Content`
+
+#### **POST** `/api/amizades/bloquear/{bloqueadorId}/{bloqueadoId}`
+Bloqueia um usuário (impede futuras solicitações).
+
+**Response:** `204 No Content`
+
+### Status de Amizade
+
+- **PENDENTE**: Solicitação enviada, aguardando resposta
+- **ACEITA**: Amizade estabelecida
+- **REJEITADA**: Solicitação recusada
+- **BLOQUEADA**: Usuário bloqueado
+
+### Funcionalidades do Sistema de Amizades
+
+✅ **Implementado e Testado:**
+- Envio de solicitações de amizade com validações
+- Listagem de convites pendentes
+- Aceitação e rejeição de convites
+- Listagem de amigos de um usuário
+- Verificação de status de amizade entre usuários
+- Remoção de amizade
+- Sistema de bloqueio de usuários
+- Prevenção de solicitações duplicadas
+- Validação de permissões (apenas convidado pode responder)
+
+---
+
+### �📈 Relatórios e Saldos
 
 #### **GET** `/api/usuarios/{usuarioId}/historico`
 Retorna histórico completo de transações do usuário.
@@ -561,15 +849,68 @@ O projeto utiliza H2 Database em memória para desenvolvimento. Para acessar o c
 ### Estrutura das Tabelas
 
 - **usuarios**: id, nome, email, chave_pix
-- **contas**: id, descricao, valor, vencimento, criador_id, paga, data_criacao
+- **contas**: id, descricao, valor, vencimento, criador_id, grupo_id, paga, data_criacao
 - **divisoes**: id, conta_id, usuario_id, valor, pago, data_pagamento, forma_pagamento
 - **dividas**: id, descricao, valor, usuario_devedor_id, usuario_credor_id, data_criacao, data_vencimento, paga, data_pagamento, forma_pagamento
 - **compras**: id, descricao, data_compra, data_criacao, usuario_criador_id, finalizada, observacoes
 - **itens_compra**: id, compra_id, descricao, valor, quantidade, usuario_responsavel_id, observacoes
+- **grupos**: id, nome, descricao, criador_id, data_criacao, ativo
+- **grupo_membros**: grupo_id, usuario_id (tabela de relacionamento many-to-many)
+- **amizades**: id, solicitante_id, convidado_id, status, data_solicitacao, data_resposta
 
 ## 🧪 Exemplos de Teste
 
-### Cenário Completo: Jantar em Grupo
+### Cenário Completo: Grupo de República
+
+1. **Criar usuários e estabelecer amizades:**
+```bash
+# Criar usuários
+curl -X POST http://localhost:8080/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{"nome": "Ana", "email": "ana@email.com", "chavePix": "ana@pix.com"}'
+
+curl -X POST http://localhost:8080/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{"nome": "Bruno", "email": "bruno@email.com", "chavePix": "11987654321"}'
+
+# Estabelecer amizade
+curl -X POST http://localhost:8080/api/amizades/solicitar/1 \
+  -H "Content-Type: application/json" \
+  -d '{"convidadoId": 2}'
+
+curl -X POST http://localhost:8080/api/amizades/1/aceitar/2
+```
+
+2. **Criar grupo:**
+```bash
+curl -X POST http://localhost:8080/api/grupos/criar/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "República da Ana",
+    "descricao": "Grupo para dividir contas da república",
+    "membrosIniciais": [2]
+  }'
+```
+
+3. **Criar conta associada ao grupo:**
+```bash
+curl -X POST http://localhost:8080/api/contas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "descricao": "Conta de Luz",
+    "valor": 150.00,
+    "vencimento": "2025-08-15",
+    "criadorId": 1,
+    "grupoId": 1
+  }'
+```
+
+4. **Listar contas do grupo:**
+```bash
+curl -X GET http://localhost:8080/api/contas/grupo/1
+```
+
+### Cenário Completo: Compra em Grupo
 
 1. **Criar usuários:**
 ```bash

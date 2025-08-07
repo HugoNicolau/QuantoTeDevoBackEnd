@@ -158,6 +158,17 @@ public class ContaService {
             .orElseThrow(() -> new RecursoNaoEncontradoException("Conta", id));
     }
     
+    @Transactional(readOnly = true)
+    public List<ContaDTO> listarContasDoGrupo(Long grupoId, Boolean paga) {
+        // Primeiro, vamos usar uma consulta simples sem injetar GrupoService
+        // para evitar dependência circular
+        return contaRepository.findAll().stream()
+                .filter(conta -> conta.getGrupo() != null && conta.getGrupo().getId().equals(grupoId))
+                .filter(conta -> paga == null || conta.getPaga().equals(paga))
+                .map(this::converterParaDTO)
+                .collect(Collectors.toList());
+    }
+    
     private ContaDTO converterParaDTO(Conta conta) {
         UsuarioDTO criadorDTO = UsuarioDTO.builder()
             .id(conta.getCriador().getId())

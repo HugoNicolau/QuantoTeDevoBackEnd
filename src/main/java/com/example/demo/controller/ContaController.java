@@ -111,6 +111,14 @@ public class ContaController {
         return ResponseEntity.ok(contaAtualizada);
     }
     
+    @GetMapping("/grupo/{grupoId}")
+    public ResponseEntity<List<ContaDTO>> listarContasDoGrupo(
+            @PathVariable Long grupoId,
+            @RequestParam(required = false) Boolean paga) {
+        List<ContaDTO> contas = contaService.listarContasDoGrupo(grupoId, paga);
+        return ResponseEntity.ok(contas);
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarConta(@PathVariable Long id) {
         contaService.deletarConta(id);

@@ -45,6 +45,11 @@ public class Conta {
     @JsonBackReference("usuario-contas")
     private Usuario criador;
     
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupo_id")
+    @JsonBackReference("grupo-contas")
+    private Grupo grupo;
+    
     @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference("conta-divisoes")
     private List<Divisao> divisoes;
