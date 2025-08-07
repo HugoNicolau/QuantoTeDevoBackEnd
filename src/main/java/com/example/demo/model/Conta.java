@@ -36,6 +36,10 @@ public class Conta {
     @Builder.Default
     private Boolean paga = false;
     
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private StatusConta status = StatusConta.PENDENTE;
+    
     @Column(name = "data_criacao")
     @Builder.Default
     private LocalDateTime dataCriacao = LocalDateTime.now();

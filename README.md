@@ -161,6 +161,7 @@ Lista contas associadas a um grupo.
 - **RF14**: Sistema de grupos para divisão recorrente
 - **RF15**: Gerenciamento de membros de grupos
 - **RF16**: Divisão automática por porcentagem
+- **RF17**: Marcar contas como vencidas manualmente
 
 ## 🔗 Documentação das APIs
 
@@ -371,8 +372,18 @@ Cria uma nova conta.
 }
 ```
 
-#### **GET** `/api/contas`
-Lista todas as contas.
+##### Status das Contas
+As contas possuem os seguintes status possíveis:
+- **PENDENTE**: Conta criada mas ainda não paga nem vencida
+- **PAGA**: Conta foi marcada como paga
+- **VENCIDA**: Conta foi marcada como vencida (manualmente ou automaticamente)
+- **PARCIALMENTE_PAGA**: Conta teve apenas parte do valor pago (uso futuro)
+
+#### **GET** `/api/contas/{id}`
+Busca uma conta específica por ID.
+
+#### **GET** `/api/contas/usuario/{usuarioId}`
+Lista todas as contas relacionadas a um usuário específico (criadas por ele ou onde ele participa).
 
 **Query Parameters:**
 - `paga` (opcional): `true` ou `false` para filtrar por status de pagamento
@@ -385,27 +396,90 @@ Lista todas as contas.
     "descricao": "Jantar no restaurante",
     "valor": 120.50,
     "vencimento": "2025-08-15",
+    "paga": false,
+    "status": "PENDENTE",
+    "dataCriacao": "2025-08-06T20:30:00",
     "criador": {
       "id": 1,
       "nome": "João Silva",
       "email": "joao@email.com",
       "chavePix": "joao@pix.com"
-    },
-    "paga": false,
-    "dataCriacao": "2025-08-06T20:30:00",
-    "divisoes": []
+    }
   }
 ]
 ```
 
-#### **GET** `/api/contas/{id}`
-Busca uma conta por ID.
+#### **GET** `/api/contas/usuario/{usuarioId}/filtros`
+Lista contas de um usuário com filtros avançados.
+
+**Query Parameters:**
+- `paga` (opcional): `true` ou `false` para filtrar por status
+- `vencimentoInicial` (opcional): Data inicial (formato: YYYY-MM-DD)
+- `vencimentoFinal` (opcional): Data final (formato: YYYY-MM-DD)
+
+#### **GET** `/api/contas/usuario/{usuarioId}/vencidas`
+Lista apenas as contas vencidas de um usuário específico.
+
+#### **GET** `/api/contas/grupo/{grupoId}`
+Lista contas de um grupo específico.
+
+**Query Parameters:**
+- `paga` (opcional): `true` ou `false` para filtrar por status
 
 #### **PUT** `/api/contas/{id}`
 Atualiza uma conta.
 
 #### **DELETE** `/api/contas/{id}`
 Remove uma conta.
+
+#### **PATCH** `/api/contas/{id}/marcar-paga`
+Marca uma conta como paga.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "descricao": "Jantar no restaurante",
+  "valor": 120.50,
+  "vencimento": "2025-08-15",
+  "paga": true,
+  "status": "PAGA",
+  "dataCriacao": "2025-08-06T20:30:00",
+  "criador": {...}
+}
+```
+
+#### **PATCH** `/api/contas/{id}/marcar-vencida` 🆕
+Marca uma conta como vencida manualmente (RF17).
+
+**Comportamento:**
+- Só funciona para contas não pagas (status PENDENTE)
+- Contas já pagas retornam erro 400
+- Útil para marcar contas que já passaram do vencimento
+
+**Response (Sucesso):**
+```json
+{
+  "id": 1,
+  "descricao": "Conta de teste para vencimento",
+  "valor": 150.00,
+  "vencimento": "2025-08-10",
+  "paga": false,
+  "status": "VENCIDA",
+  "dataCriacao": "2025-08-07T01:47:53.694682",
+  "criador": {...}
+}
+```
+
+**Response (Erro - conta já paga):**
+```json
+{
+  "timestamp": "2025-08-07T01:48:35.108",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Não é possível marcar uma conta paga como vencida"
+}
+```
 
 #### **GET** `/api/contas/usuario/{usuarioId}`
 Lista contas de um usuário específico.

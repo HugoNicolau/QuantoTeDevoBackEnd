@@ -43,6 +43,7 @@ com/example/demo/dto/SolicitarAmizadeDTO.class
 com/example/demo/dto/ItemCompraDTO$ItemCompraDTOBuilder.class
 com/example/demo/model/Divida.class
 com/example/demo/dto/DividirPorcentagemDTO.class
+com/example/demo/model/StatusConta.class
 com/example/demo/model/Compra.class
 com/example/demo/dto/GrupoDTO.class
 com/example/demo/dto/CriarCompraDTO$CriarItemCompraDTO.class

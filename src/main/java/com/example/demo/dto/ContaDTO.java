@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.model.StatusConta;
 import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -29,6 +30,7 @@ public class ContaDTO {
     
     private LocalDate vencimento;
     private Boolean paga;
+    private StatusConta status;
     private LocalDateTime dataCriacao;
     
     @NotNull(message = "ID do criador é obrigatório")

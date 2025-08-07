@@ -38,6 +38,7 @@
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/model/Grupo.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/model/ItemCompra.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/model/StatusAmizade.java
+/home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/model/StatusConta.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/model/Usuario.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/repository/AmizadeRepository.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/repository/CompraRepository.java

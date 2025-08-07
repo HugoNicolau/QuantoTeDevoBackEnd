@@ -4,6 +4,7 @@ import com.example.demo.dto.ContaDTO;
 import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 import com.example.demo.model.Conta;
+import com.example.demo.model.StatusConta;
 import com.example.demo.model.Usuario;
 import com.example.demo.repository.ContaRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ContaService {
             .valor(contaDTO.getValor())
             .vencimento(contaDTO.getVencimento())
             .paga(false)
+            .status(StatusConta.PENDENTE)
             .criador(criador)
             .build();
         
@@ -140,8 +142,24 @@ public class ContaService {
             .orElseThrow(() -> new RecursoNaoEncontradoException("Conta", id));
         
         conta.setPaga(true);
+        conta.setStatus(StatusConta.PAGA);
         Conta contaAtualizada = contaRepository.save(conta);
         return converterParaDTO(contaAtualizada);
+    }
+    
+    @Transactional
+    public ContaDTO marcarComoVencida(Long id) {
+        Conta conta = contaRepository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Conta", id));
+        
+        // Só marca como vencida se não estiver paga
+        if (!conta.getPaga()) {
+            conta.setStatus(StatusConta.VENCIDA);
+            Conta contaAtualizada = contaRepository.save(conta);
+            return converterParaDTO(contaAtualizada);
+        } else {
+            throw new IllegalStateException("Não é possível marcar uma conta paga como vencida");
+        }
     }
     
     @Transactional
@@ -183,6 +201,7 @@ public class ContaService {
             .valor(conta.getValor())
             .vencimento(conta.getVencimento())
             .paga(conta.getPaga())
+            .status(conta.getStatus())
             .dataCriacao(conta.getDataCriacao())
             .criadorId(conta.getCriador().getId())
             .criador(criadorDTO)

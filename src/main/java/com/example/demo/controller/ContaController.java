@@ -46,31 +46,6 @@ public class ContaController {
         return ResponseEntity.ok(contas);
     }
     
-    @GetMapping
-    @Deprecated // Esta rota deve ser usada apenas para fins administrativos
-    public ResponseEntity<List<ContaDTO>> listarTodasContas(
-            @RequestParam(required = false) Boolean paga,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoInicial,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoFinal) {
-        List<ContaDTO> contas;
-        
-        // ATENÇÃO: Esta rota retorna TODAS as contas do sistema (uso administrativo)
-        if (vencimentoInicial != null && vencimentoFinal != null) {
-            if (paga != null) {
-                contas = contaService.listarContasPorStatusEPeriodo(paga, vencimentoInicial, vencimentoFinal);
-            } else {
-                contas = contaService.listarContasPorPeriodo(vencimentoInicial, vencimentoFinal);
-            }
-        } else if (paga != null) {
-            contas = contaService.listarContasPorStatus(paga);
-        } else {
-            // Se não especificado, listar todas as contas não pagas por padrão
-            contas = contaService.listarContasPorStatus(false);
-        }
-        
-        return ResponseEntity.ok(contas);
-    }
-    
     // RF05: Nova rota específica para contas de um usuário com filtros
     @GetMapping("/usuario/{usuarioId}/filtros")
     public ResponseEntity<List<ContaDTO>> listarContasDoUsuarioComFiltros(
@@ -82,13 +57,6 @@ public class ContaController {
         List<ContaDTO> contas = contaService.listarContasDoUsuarioComFiltros(
             usuarioId, paga, vencimentoInicial, vencimentoFinal);
         return ResponseEntity.ok(contas);
-    }
-    
-    @GetMapping("/vencidas")
-    @Deprecated // Esta rota deve ser usada apenas para fins administrativos
-    public ResponseEntity<List<ContaDTO>> listarContasVencidas() {
-        List<ContaDTO> contasVencidas = contaService.listarContasVencidas();
-        return ResponseEntity.ok(contasVencidas);
     }
     
     @GetMapping("/usuario/{usuarioId}/vencidas")
@@ -108,6 +76,12 @@ public class ContaController {
     @PatchMapping("/{id}/marcar-paga")
     public ResponseEntity<ContaDTO> marcarComoPaga(@PathVariable Long id) {
         ContaDTO contaAtualizada = contaService.marcarComoPaga(id);
+        return ResponseEntity.ok(contaAtualizada);
+    }
+    
+    @PatchMapping("/{id}/marcar-vencida")
+    public ResponseEntity<ContaDTO> marcarComoVencida(@PathVariable Long id) {
+        ContaDTO contaAtualizada = contaService.marcarComoVencida(id);
         return ResponseEntity.ok(contaAtualizada);
     }
     
