@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.*;
+import com.example.demo.dto.SaldoContatoDTO;
+import com.example.demo.dto.SaldoUsuarioDTO;
+import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.exception.NegocioException;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 import com.example.demo.model.Divisao;
@@ -8,7 +10,6 @@ import com.example.demo.model.Usuario;
 import com.example.demo.repository.DivisaoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -203,39 +204,5 @@ public class UsuarioService {
             .email(usuario.getEmail())
             .chavePix(usuario.getChavePix())
             .build();
-    }
-    
-    // Métodos de autenticação
-    @Transactional
-    public Usuario registrarUsuario(RegisterRequest request, PasswordEncoder passwordEncoder) {
-        // Verificar se email já existe
-        if (usuarioRepository.existsByEmail(request.getEmail())) {
-            throw new NegocioException("Email já cadastrado no sistema");
-        }
-        
-        Usuario usuario = Usuario.builder()
-            .nome(request.getNome())
-            .email(request.getEmail())
-            .senha(passwordEncoder.encode(request.getSenha()))
-            .chavePix(request.getChavePix())
-            .build();
-        
-        return usuarioRepository.save(usuario);
-    }
-    
-    public Usuario autenticarUsuario(LoginRequest request, PasswordEncoder passwordEncoder) {
-        Usuario usuario = usuarioRepository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Email não encontrado"));
-        
-        if (!passwordEncoder.matches(request.getSenha(), usuario.getSenha())) {
-            throw new NegocioException("Senha incorreta");
-        }
-        
-        return usuario;
-    }
-    
-    public Usuario buscarPorEmail(String email) {
-        return usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Usuário não encontrado com email: " + email));
     }
 }

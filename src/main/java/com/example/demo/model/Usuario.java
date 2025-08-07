@@ -26,8 +26,8 @@ public class Usuario {
     @Column(unique = true)
     private String email;
     
-    @Column(nullable = false)
-    private String senha;
+    @Column(name = "senha")
+    private String senha; // Opcional por enquanto, para não quebrar dados existentes
     
     @Column(name = "chave_pix")
     private String chavePix;
