@@ -19,6 +19,11 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
     
     List<Conta> findByVencimentoBefore(LocalDate data);
     
+    // RF05: Métodos para filtros por período
+    List<Conta> findByVencimentoBetween(LocalDate inicio, LocalDate fim);
+    
+    List<Conta> findByPagaAndVencimentoBetween(Boolean paga, LocalDate inicio, LocalDate fim);
+    
     @Query("SELECT c FROM Conta c JOIN c.divisoes d WHERE d.usuario = :usuario")
     List<Conta> findContasDoUsuario(@Param("usuario") Usuario usuario);
     

@@ -22,6 +22,15 @@ public interface DivisaoRepository extends JpaRepository<Divisao, Long> {
     
     List<Divisao> findByUsuarioAndPago(Usuario usuario, Boolean pago);
     
+    // Novos métodos para saldos
+    List<Divisao> findByUsuarioIdAndPago(Long usuarioId, Boolean pago);
+    
+    @Query("SELECT d FROM Divisao d WHERE d.conta.criador.id = :criadorId AND d.pago = :pago")
+    List<Divisao> findByContaCriadorIdAndPago(@Param("criadorId") Long criadorId, @Param("pago") Boolean pago);
+    
+    @Query("SELECT d FROM Divisao d WHERE d.conta.criador.id = :criadorId AND d.usuario.id = :usuarioId AND d.pago = :pago")
+    List<Divisao> findByContaCriadorIdAndUsuarioIdAndPago(@Param("criadorId") Long criadorId, @Param("usuarioId") Long usuarioId, @Param("pago") Boolean pago);
+    
     @Query("SELECT SUM(d.valor) FROM Divisao d WHERE d.usuario = :usuario AND d.pago = false")
     BigDecimal calcularTotalDevidoPorUsuario(@Param("usuario") Usuario usuario);
     

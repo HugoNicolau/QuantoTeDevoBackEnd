@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.DivisaoContaDTO;
+import com.example.demo.dto.MarcarPagamentoDTO;
 import com.example.demo.exception.NegocioException;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 import com.example.demo.model.Conta;
@@ -122,6 +123,31 @@ public class DivisaoService {
         
         divisao.setPago(true);
         divisao.setDataPagamento(LocalDateTime.now());
+        divisaoRepository.save(divisao);
+        
+        // Verificar se todas as divisões da conta foram pagas
+        List<Divisao> divisoesDaConta = divisaoRepository.findByConta(divisao.getConta());
+        boolean todasPagas = divisoesDaConta.stream().allMatch(Divisao::getPago);
+        
+        if (todasPagas) {
+            // Marcar a conta como paga
+            contaService.marcarComoPaga(divisao.getConta().getId());
+        }
+    }
+    
+    // RF10: Método aprimorado para marcar pagamento com detalhes
+    @Transactional
+    public void marcarDivisaoComoPaga(Long divisaoId, MarcarPagamentoDTO pagamentoDTO) {
+        Divisao divisao = divisaoRepository.findById(divisaoId)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Divisão", divisaoId));
+        
+        if (divisao.getPago()) {
+            throw new NegocioException("Esta divisão já foi marcada como paga");
+        }
+        
+        divisao.setPago(true);
+        divisao.setDataPagamento(pagamentoDTO.getDataPagamento());
+        divisao.setFormaPagamento(pagamentoDTO.getFormaPagamento());
         divisaoRepository.save(divisao);
         
         // Verificar se todas as divisões da conta foram pagas

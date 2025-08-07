@@ -3,11 +3,13 @@ package com.example.demo.controller;
 import com.example.demo.dto.ContaDTO;
 import com.example.demo.service.ContaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -31,16 +33,35 @@ public class ContaController {
     }
     
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<ContaDTO>> listarContasDoUsuario(@PathVariable Long usuarioId) {
-        List<ContaDTO> contas = contaService.listarContasDoUsuario(usuarioId);
+    public ResponseEntity<List<ContaDTO>> listarContasDoUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) Boolean paga) {
+        // Rota simples sem filtros de data (mantida para compatibilidade)
+        List<ContaDTO> contas;
+        if (paga != null) {
+            contas = contaService.listarContasDoUsuarioComFiltros(usuarioId, paga, null, null);
+        } else {
+            contas = contaService.listarContasDoUsuario(usuarioId);
+        }
         return ResponseEntity.ok(contas);
     }
     
     @GetMapping
-    public ResponseEntity<List<ContaDTO>> listarContas(@RequestParam(required = false) Boolean paga) {
+    @Deprecated // Esta rota deve ser usada apenas para fins administrativos
+    public ResponseEntity<List<ContaDTO>> listarTodasContas(
+            @RequestParam(required = false) Boolean paga,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoInicial,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoFinal) {
         List<ContaDTO> contas;
         
-        if (paga != null) {
+        // ATENÇÃO: Esta rota retorna TODAS as contas do sistema (uso administrativo)
+        if (vencimentoInicial != null && vencimentoFinal != null) {
+            if (paga != null) {
+                contas = contaService.listarContasPorStatusEPeriodo(paga, vencimentoInicial, vencimentoFinal);
+            } else {
+                contas = contaService.listarContasPorPeriodo(vencimentoInicial, vencimentoFinal);
+            }
+        } else if (paga != null) {
             contas = contaService.listarContasPorStatus(paga);
         } else {
             // Se não especificado, listar todas as contas não pagas por padrão
@@ -50,9 +71,29 @@ public class ContaController {
         return ResponseEntity.ok(contas);
     }
     
+    // RF05: Nova rota específica para contas de um usuário com filtros
+    @GetMapping("/usuario/{usuarioId}/filtros")
+    public ResponseEntity<List<ContaDTO>> listarContasDoUsuarioComFiltros(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) Boolean paga,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoInicial,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate vencimentoFinal) {
+        
+        List<ContaDTO> contas = contaService.listarContasDoUsuarioComFiltros(
+            usuarioId, paga, vencimentoInicial, vencimentoFinal);
+        return ResponseEntity.ok(contas);
+    }
+    
     @GetMapping("/vencidas")
+    @Deprecated // Esta rota deve ser usada apenas para fins administrativos
     public ResponseEntity<List<ContaDTO>> listarContasVencidas() {
         List<ContaDTO> contasVencidas = contaService.listarContasVencidas();
+        return ResponseEntity.ok(contasVencidas);
+    }
+    
+    @GetMapping("/usuario/{usuarioId}/vencidas")
+    public ResponseEntity<List<ContaDTO>> listarContasVencidasDoUsuario(@PathVariable Long usuarioId) {
+        List<ContaDTO> contasVencidas = contaService.listarContasVencidasDoUsuario(usuarioId);
         return ResponseEntity.ok(contasVencidas);
     }
     

@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.SaldoUsuarioDTO;
 import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -54,5 +56,21 @@ public class UsuarioController {
     public ResponseEntity<Void> deletarUsuario(@PathVariable Long id) {
         usuarioService.deletarUsuario(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    // RF03: Endpoint para saldos consolidados do usuário
+    @GetMapping("/{id}/saldos")
+    public ResponseEntity<SaldoUsuarioDTO> obterSaldosUsuario(@PathVariable Long id) {
+        SaldoUsuarioDTO saldos = usuarioService.calcularSaldosUsuario(id);
+        return ResponseEntity.ok(saldos);
+    }
+    
+    // RF09: Endpoint para saldo entre dois usuários específicos
+    @GetMapping("/{id}/saldo-com/{outroUsuarioId}")
+    public ResponseEntity<BigDecimal> obterSaldoComUsuario(
+            @PathVariable Long id, 
+            @PathVariable Long outroUsuarioId) {
+        BigDecimal saldo = usuarioService.calcularSaldoComUsuario(id, outroUsuarioId);
+        return ResponseEntity.ok(saldo);
     }
 }

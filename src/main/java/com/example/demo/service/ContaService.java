@@ -67,6 +67,56 @@ public class ContaService {
             .collect(Collectors.toList());
     }
     
+    @Transactional(readOnly = true)
+    public List<ContaDTO> listarContasVencidasDoUsuario(Long usuarioId) {
+        return contaRepository.findByVencimentoBefore(LocalDate.now()).stream()
+            .filter(conta -> !conta.getPaga())
+            .filter(conta -> conta.getCriador().getId().equals(usuarioId))
+            .map(this::converterParaDTO)
+            .collect(Collectors.toList());
+    }
+    
+    // RF05: Filtros por período
+    @Transactional(readOnly = true)
+    public List<ContaDTO> listarContasPorPeriodo(LocalDate inicio, LocalDate fim) {
+        return contaRepository.findByVencimentoBetween(inicio, fim).stream()
+            .map(this::converterParaDTO)
+            .collect(Collectors.toList());
+    }
+    
+    @Transactional(readOnly = true)
+    public List<ContaDTO> listarContasPorStatusEPeriodo(boolean paga, LocalDate inicio, LocalDate fim) {
+        return contaRepository.findByPagaAndVencimentoBetween(paga, inicio, fim).stream()
+            .map(this::converterParaDTO)
+            .collect(Collectors.toList());
+    }
+    
+    // RF05: Método para filtrar contas específicas de um usuário
+    @Transactional(readOnly = true)
+    public List<ContaDTO> listarContasDoUsuarioComFiltros(Long usuarioId, Boolean paga, LocalDate inicio, LocalDate fim) {
+        Usuario usuario = usuarioService.encontrarUsuarioPorId(usuarioId);
+        
+        // Buscar contas relacionadas ao usuário (criadas por ele ou onde ele participa)
+        List<Conta> contasRelacionadas = contaRepository.findContasRelacionadasAoUsuario(usuario);
+        
+        return contasRelacionadas.stream()
+            .filter(conta -> {
+                // Filtrar por status se especificado
+                if (paga != null && !conta.getPaga().equals(paga)) {
+                    return false;
+                }
+                
+                // Filtrar por período se especificado
+                if (inicio != null && fim != null && conta.getVencimento() != null) {
+                    return !conta.getVencimento().isBefore(inicio) && !conta.getVencimento().isAfter(fim);
+                }
+                
+                return true;
+            })
+            .map(this::converterParaDTO)
+            .collect(Collectors.toList());
+    }
+    
     @Transactional
     public ContaDTO atualizarConta(Long id, ContaDTO contaDTO) {
         Conta conta = contaRepository.findById(id)

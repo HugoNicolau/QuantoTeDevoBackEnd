@@ -33,7 +33,8 @@ public class HealthController {
         response.put("endpoints", Map.of(
             "usuarios", "/api/usuarios",
             "contas", "/api/contas", 
-            "divisoes", "/api/divisoes"
+            "divisoes", "/api/divisoes",
+            "dividas", "/api/dividas"
         ));
         
         return ResponseEntity.ok(response);

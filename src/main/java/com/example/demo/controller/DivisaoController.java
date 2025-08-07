@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.DivisaoContaDTO;
+import com.example.demo.dto.MarcarPagamentoDTO;
 import com.example.demo.model.Divisao;
 import com.example.demo.service.DivisaoService;
 import lombok.RequiredArgsConstructor;
@@ -63,5 +64,14 @@ public class DivisaoController {
     public ResponseEntity<String> marcarDivisaoComoPaga(@PathVariable Long divisaoId) {
         divisaoService.marcarDivisaoComoPaga(divisaoId);
         return ResponseEntity.ok("Divisão marcada como paga!");
+    }
+    
+    // RF10: Endpoint aprimorado para marcar pagamento com detalhes
+    @PatchMapping("/{divisaoId}/marcar-paga-detalhada")
+    public ResponseEntity<String> marcarDivisaoComoPagaDetalhada(
+            @PathVariable Long divisaoId,
+            @Valid @RequestBody MarcarPagamentoDTO pagamentoDTO) {
+        divisaoService.marcarDivisaoComoPaga(divisaoId, pagamentoDTO);
+        return ResponseEntity.ok("Divisão marcada como paga com detalhes!");
     }
 }

@@ -37,4 +37,8 @@ public class Divisao {
     
     @Column(name = "data_pagamento")
     private LocalDateTime dataPagamento;
+    
+    // RF10: Adicionar campo para forma de pagamento
+    @Column(name = "forma_pagamento")
+    private String formaPagamento;
 }
