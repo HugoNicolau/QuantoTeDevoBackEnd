@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.dto.SaldoContatoDTO;
 import com.example.demo.dto.SaldoUsuarioDTO;
 import com.example.demo.dto.UsuarioDTO;
+// import com.example.demo.dto.RegisterRequest;
+// import com.example.demo.dto.LoginRequest;
 import com.example.demo.exception.NegocioException;
 import com.example.demo.exception.RecursoNaoEncontradoException;
 import com.example.demo.model.Divisao;
@@ -10,6 +12,7 @@ import com.example.demo.model.Usuario;
 import com.example.demo.repository.DivisaoRepository;
 import com.example.demo.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +29,7 @@ public class UsuarioService {
     
     private final UsuarioRepository usuarioRepository;
     private final DivisaoRepository divisaoRepository;
+    private final PasswordEncoder passwordEncoder;
     
     @Transactional
     public UsuarioDTO criarUsuario(UsuarioDTO usuarioDTO) {
@@ -205,4 +209,6 @@ public class UsuarioService {
             .chavePix(usuario.getChavePix())
             .build();
     }
+    
+    // Métodos de autenticação serão implementados separadamente
 }
