@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 
@@ -38,6 +39,7 @@ public class ItemCompra {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "compra_id", nullable = false)
     @NotNull
+    @JsonBackReference("compra-itens")
     private Compra compra;
     
     @ManyToOne(fetch = FetchType.LAZY)

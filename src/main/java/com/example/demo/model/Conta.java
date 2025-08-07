@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,8 +42,10 @@ public class Conta {
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criador_id", nullable = false)
+    @JsonBackReference("usuario-contas")
     private Usuario criador;
     
     @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("conta-divisoes")
     private List<Divisao> divisoes;
 }

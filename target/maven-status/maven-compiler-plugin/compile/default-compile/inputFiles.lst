@@ -13,6 +13,7 @@
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/DivisaoContaDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/ItemCompraDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/MarcarPagamentoDTO.java
+/home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/RegisterRequest.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/SaldoContatoDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/SaldoUsuarioDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/UsuarioDTO.java
