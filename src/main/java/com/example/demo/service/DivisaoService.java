@@ -28,6 +28,11 @@ public class DivisaoService {
     private final UsuarioService usuarioService;
     
     @Transactional
+    public Divisao salvarDivisao(Divisao divisao) {
+        return divisaoRepository.save(divisao);
+    }
+    
+    @Transactional
     public void dividirConta(DivisaoContaDTO divisaoContaDTO) {
         Conta conta = contaService.encontrarContaPorId(divisaoContaDTO.getContaId());
         

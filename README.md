@@ -162,6 +162,7 @@ Lista contas associadas a um grupo.
 - **RF15**: Gerenciamento de membros de grupos
 - **RF16**: Divisão automática por porcentagem
 - **RF17**: Marcar contas como vencidas manualmente
+- **RF18**: Sistema de convites para não-amigos
 
 ## 🔗 Documentação das APIs
 
@@ -912,6 +913,173 @@ Bloqueia um usuário (impede futuras solicitações).
 
 ---
 
+### 💌 Sistema de Convites para Não-Amigos (`/api/convites`) - RF18
+
+O sistema de convites permite convidar pessoas que ainda não são usuários ou não são amigos para participar de contas específicas através de links únicos por email.
+
+#### **POST** `/api/convites/conta/{contaId}/convidar/{usuarioId}`
+Cria um convite para uma conta específica.
+
+**Request Body:**
+```json
+{
+  "emailConvidado": "joao@email.com",
+  "nomeConvidado": "João Silva",
+  "valorSugerido": 60.25,
+  "mensagem": "Vamos dividir o jantar de ontem!",
+  "diasValidadeConvite": 7
+}
+```
+
+**Response:**
+```json
+{
+  "id": 1,
+  "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "emailConvidado": "joao@email.com",
+  "nomeConvidado": "João Silva",
+  "valorSugerido": 60.25,
+  "mensagem": "Vamos dividir o jantar de ontem!",
+  "status": "PENDENTE",
+  "dataConvite": "2025-08-07T02:15:00",
+  "dataExpiracao": "2025-08-14T02:15:00",
+  "contaId": 1,
+  "contaDescricao": "Jantar no restaurante",
+  "contaValor": 120.50,
+  "usuarioConvidanteId": 1,
+  "usuarioConvidanteNome": "Ana",
+  "usuarioConvidanteEmail": "ana@email.com",
+  "expirado": false,
+  "diasParaVencer": 7
+}
+```
+
+#### **GET** `/api/convites/token/{token}`
+Busca detalhes de um convite pelo token único.
+
+**Response:**
+```json
+{
+  "id": 1,
+  "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "emailConvidado": "joao@email.com",
+  "nomeConvidado": "João Silva",
+  "valorSugerido": 60.25,
+  "mensagem": "Vamos dividir o jantar de ontem!",
+  "status": "PENDENTE",
+  "dataConvite": "2025-08-07T02:15:00",
+  "dataExpiracao": "2025-08-14T02:15:00",
+  "contaId": 1,
+  "contaDescricao": "Jantar no restaurante",
+  "contaValor": 120.50,
+  "usuarioConvidanteId": 1,
+  "usuarioConvidanteNome": "Ana",
+  "expirado": false,
+  "diasParaVencer": 7
+}
+```
+
+#### **POST** `/api/convites/token/{token}/aceitar`
+Aceita um convite e opcionalmente cria automaticamente uma divisão.
+
+**Request Body:**
+```json
+{
+  "nome": "João Silva",
+  "chavePix": "joao@pix.com",
+  "aceitarDivisao": true
+}
+```
+
+**Comportamento:**
+- Se o email já existe no sistema, usa o usuário existente
+- Se não existe, cria um novo usuário com os dados fornecidos
+- Se `aceitarDivisao` é `true` e há `valorSugerido`, cria divisão automaticamente
+
+**Response:**
+```json
+{
+  "id": 1,
+  "token": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "emailConvidado": "joao@email.com",
+  "nomeConvidado": "João Silva",
+  "valorSugerido": 60.25,
+  "status": "ACEITO",
+  "dataConvite": "2025-08-07T02:15:00",
+  "dataAceite": "2025-08-07T02:20:00",
+  "contaId": 1,
+  "contaDescricao": "Jantar no restaurante",
+  "usuarioConvidadoId": 2,
+  "usuarioConvidadoNome": "João Silva",
+  "expirado": false
+}
+```
+
+#### **POST** `/api/convites/token/{token}/rejeitar`
+Rejeita um convite.
+
+**Response:** `204 No Content`
+
+#### **GET** `/api/convites/conta/{contaId}`
+Lista todos os convites de uma conta específica.
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "emailConvidado": "joao@email.com",
+    "nomeConvidado": "João Silva",
+    "valorSugerido": 60.25,
+    "status": "PENDENTE",
+    "dataConvite": "2025-08-07T02:15:00",
+    "expirado": false,
+    "diasParaVencer": 7
+  }
+]
+```
+
+#### **GET** `/api/convites/usuario/{usuarioId}/enviados`
+Lista convites enviados por um usuário.
+
+#### **GET** `/api/convites/email/{email}/pendentes`
+Lista convites pendentes para um email específico (não expirados).
+
+#### **POST** `/api/convites/marcar-expirados`
+Marca convites expirados automaticamente (processo interno).
+
+### Status de Convite
+
+- **PENDENTE**: Convite enviado, aguardando resposta
+- **ACEITO**: Convite aceito, usuário participando da conta
+- **REJEITADO**: Convite rejeitado
+- **EXPIRADO**: Convite expirou sem resposta
+
+### Regras de Negócio - Convites
+
+- ✅ **Apenas criador da conta pode enviar convites**
+- ✅ **Convites têm prazo de validade configurável (padrão 7 dias)**
+- ✅ **Tokens únicos e seguros (UUID)**
+- ✅ **Criação automática de usuários ao aceitar convite**
+- ✅ **Integração automática com sistema de divisões**
+- ✅ **Prevenção de convites duplicados para o mesmo email/conta**
+- ✅ **Validação de expiração em tempo real**
+- ✅ **Não permite convidar a si mesmo**
+
+### Funcionalidades do Sistema de Convites
+
+✅ **Implementado e Testado:**
+- Criação de convites com tokens únicos
+- Envio de convites por email com valores sugeridos
+- Aceitação e rejeição de convites
+- Criação automática de usuários
+- Integração automática com divisões de conta
+- Sistema de expiração de convites
+- Listagem de convites por conta, usuário e email
+- Validações de segurança e permissões
+
+---
+
 ### �📈 Relatórios e Saldos
 
 #### **GET** `/api/usuarios/{usuarioId}/historico`
@@ -961,6 +1129,7 @@ O projeto utiliza H2 Database em memória para desenvolvimento. Para acessar o c
 - **grupos**: id, nome, descricao, criador_id, data_criacao, ativo
 - **grupo_membros**: grupo_id, usuario_id (tabela de relacionamento many-to-many)
 - **amizades**: id, solicitante_id, convidado_id, status, data_solicitacao, data_resposta
+- **convites_conta**: id, token, email_convidado, nome_convidado, valor_sugerido, mensagem, conta_id, usuario_convidante_id, usuario_convidado_id, status, data_convite, data_expiracao, data_aceite, data_rejeicao
 
 ## 🧪 Exemplos de Teste
 
@@ -1084,6 +1253,66 @@ curl -X PATCH http://localhost:8080/api/compras/1/finalizar
 ```bash
 curl -X GET http://localhost:8080/api/dividas/usuario/2/devendo
 ```
+
+### Cenário Completo: Sistema de Convites (RF18)
+
+1. **Criar usuário e conta:**
+```bash
+# Criar usuário
+curl -X POST http://localhost:8080/api/usuarios \
+  -H "Content-Type: application/json" \
+  -d '{"nome": "Ana", "email": "ana@email.com", "chavePix": "ana@pix.com"}'
+
+# Criar conta
+curl -X POST http://localhost:8080/api/contas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "descricao": "Jantar no restaurante",
+    "valor": 120.50,
+    "vencimento": "2025-08-15",
+    "criadorId": 1
+  }'
+```
+
+2. **Enviar convite:**
+```bash
+curl -X POST http://localhost:8080/api/convites/conta/1/convidar/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emailConvidado": "joao@email.com",
+    "nomeConvidado": "João Silva",
+    "valorSugerido": 60.25,
+    "mensagem": "Vamos dividir o jantar de ontem!",
+    "diasValidadeConvite": 7
+  }'
+```
+
+3. **Consultar convite pelo token:**
+```bash
+curl -X GET http://localhost:8080/api/convites/token/{token_retornado}
+```
+
+4. **Aceitar convite com criação automática de usuário:**
+```bash
+curl -X POST http://localhost:8080/api/convites/token/{token_retornado}/aceitar \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "João Silva",
+    "chavePix": "joao@pix.com",
+    "aceitarDivisao": true
+  }'
+```
+
+5. **Verificar divisão criada automaticamente:**
+```bash
+curl -X GET http://localhost:8080/api/divisoes/conta/1
+```
+
+**Resultado:**
+- Novo usuário "João Silva" criado automaticamente
+- Divisão de R$ 60,25 criada automaticamente para o usuário
+- Convite marcado como ACEITO
+- Integração completa sem necessidade de amizade prévia
 
 ## 📝 Status Codes
 

@@ -40,4 +40,12 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference("usuario-divisoes")
     private List<Divisao> divisoes;
+    
+    @OneToMany(mappedBy = "usuarioConvidante", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("usuario-convites-enviados")
+    private List<ConviteConta> convitesEnviados;
+    
+    @OneToMany(mappedBy = "usuarioConvidado", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("usuario-convites-recebidos")
+    private List<ConviteConta> convitesRecebidos;
 }

@@ -57,4 +57,8 @@ public class Conta {
     @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference("conta-divisoes")
     private List<Divisao> divisoes;
+    
+    @OneToMany(mappedBy = "conta", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference("conta-convites")
+    private List<ConviteConta> convites;
 }
