@@ -36,4 +36,9 @@ public interface DivisaoRepository extends JpaRepository<Divisao, Long> {
     
     @Query("SELECT d FROM Divisao d WHERE d.conta.criador = :usuario AND d.pago = false")
     List<Divisao> findDivisoesPendentesParaReceber(@Param("usuario") Usuario usuario);
+    
+    // Métodos para notificações automáticas
+    List<Divisao> findByContaAndPagoFalse(Conta conta);
+    
+    List<Divisao> findByPagoFalse();
 }

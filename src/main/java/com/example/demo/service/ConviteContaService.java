@@ -28,6 +28,7 @@ public class ConviteContaService {
     private final UsuarioService usuarioService;
     private final UsuarioRepository usuarioRepository;
     private final DivisaoService divisaoService;
+    private final NotificacaoService notificacaoService;
     
     @Transactional
     public ConviteContaDTO criarConvite(Long contaId, Long usuarioConvidanteId, CriarConviteDTO criarConviteDTO) {
@@ -73,6 +74,20 @@ public class ConviteContaService {
             .build();
         
         ConviteConta conviteSalvo = conviteRepository.save(convite);
+        
+        // Verificar se o email já é um usuário cadastrado para notificar
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(criarConviteDTO.getEmailConvidado());
+        if (usuarioExistente.isPresent()) {
+            // Notificar o usuário sobre o convite
+            notificacaoService.notificarConviteRecebido(
+                usuarioExistente.get().getId(),
+                conviteSalvo.getId(),
+                usuarioConvidante.getNome(),
+                conta.getDescricao(),
+                criarConviteDTO.getValorSugerido()
+            );
+        }
+        
         return converterParaDTO(conviteSalvo);
     }
     

@@ -21,6 +21,7 @@ public class ContaService {
     
     private final ContaRepository contaRepository;
     private final UsuarioService usuarioService;
+    private final NotificacaoService notificacaoService;
     
     @Transactional
     public ContaDTO criarConta(ContaDTO contaDTO) {
@@ -36,6 +37,15 @@ public class ContaService {
             .build();
         
         Conta contaSalva = contaRepository.save(conta);
+        
+        // Notificar criação de conta
+        notificacaoService.notificarNovaContaCriada(
+            criador.getId(), 
+            contaSalva.getId(), 
+            contaSalva.getDescricao(), 
+            contaSalva.getValor()
+        );
+        
         return converterParaDTO(contaSalva);
     }
     

@@ -1120,8 +1120,8 @@ O projeto utiliza H2 Database em memória para desenvolvimento. Para acessar o c
 
 ### Estrutura das Tabelas
 
-- **usuarios**: id, nome, email, chave_pix
-- **contas**: id, descricao, valor, vencimento, criador_id, grupo_id, paga, data_criacao
+- **usuarios**: id, nome, email, chave_pix, senha
+- **contas**: id, descricao, valor, vencimento, criador_id, grupo_id, paga, data_criacao, status
 - **divisoes**: id, conta_id, usuario_id, valor, pago, data_pagamento, forma_pagamento
 - **dividas**: id, descricao, valor, usuario_devedor_id, usuario_credor_id, data_criacao, data_vencimento, paga, data_pagamento, forma_pagamento
 - **compras**: id, descricao, data_compra, data_criacao, usuario_criador_id, finalizada, observacoes
@@ -1130,6 +1130,7 @@ O projeto utiliza H2 Database em memória para desenvolvimento. Para acessar o c
 - **grupo_membros**: grupo_id, usuario_id (tabela de relacionamento many-to-many)
 - **amizades**: id, solicitante_id, convidado_id, status, data_solicitacao, data_resposta
 - **convites_conta**: id, token, email_convidado, nome_convidado, valor_sugerido, mensagem, conta_id, usuario_convidante_id, usuario_convidado_id, status, data_convite, data_expiracao, data_aceite, data_rejeicao
+- **notificacoes**: id, usuario_id, titulo, mensagem, tipo, prioridade, data_criacao, data_leitura, lida, referencia_id, referencia_tipo, data_expiracao
 
 ## 🧪 Exemplos de Teste
 
@@ -1322,3 +1323,180 @@ curl -X GET http://localhost:8080/api/divisoes/conta/1
 - **400 Bad Request**: Erro de validação
 - **404 Not Found**: Recurso não encontrado
 - **500 Internal Server Error**: Erro interno
+
+---
+
+### 🔔 Sistema de Notificações (`/api/notificacoes`) - RF15/RF19
+
+O sistema de notificações oferece alertas automáticos e personalizados sobre vencimentos, pagamentos e atividades financeiras.
+
+#### **GET** `/api/notificacoes/usuario/{usuarioId}`
+Lista todas as notificações do usuário (não expiradas).
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "titulo": "⏰ Conta vencendo em 3 dias",
+    "mensagem": "A conta 'Jantar no restaurante' no valor de R$ 120,50 vence em 3 dias.",
+    "tipo": "CONTA_VENCENDO",
+    "tipoDescricao": "Conta próxima do vencimento",
+    "prioridade": "MEDIA",
+    "prioridadeDescricao": "Média",
+    "prioridadeCor": "#ffc107",
+    "dataCriacao": "2025-08-07T02:30:00",
+    "dataLeitura": null,
+    "lida": false,
+    "referenciaId": 1,
+    "referenciaTipo": "CONTA",
+    "dataExpiracao": "2025-09-06T02:30:00",
+    "expirada": false,
+    "diasAteExpiracao": 29
+  }
+]
+```
+
+#### **GET** `/api/notificacoes/usuario/{usuarioId}/nao-lidas`
+Lista apenas notificações não lidas do usuário.
+
+#### **GET** `/api/notificacoes/usuario/{usuarioId}/tipo/{tipo}`
+Lista notificações por tipo específico.
+
+**Tipos disponíveis:**
+- `CONTA_VENCENDO` - Conta próxima do vencimento
+- `CONTA_VENCIDA` - Conta vencida
+- `DIVIDA_PENDENTE` - Dívida pendente
+- `DIVISAO_PENDENTE` - Divisão pendente
+- `PAGAMENTO_RECEBIDO` - Pagamento recebido
+- `CONVITE_RECEBIDO` - Convite recebido
+- `CONTA_CRIADA` - Nova conta criada
+- `LEMBRETE_PAGAMENTO` - Lembrete de pagamento
+- `SISTEMA` - Notificação do sistema
+
+#### **GET** `/api/notificacoes/usuario/{usuarioId}/contador`
+Conta quantas notificações não lidas o usuário tem.
+
+**Response:**
+```json
+{
+  "naoLidas": 5,
+  "temNovas": true
+}
+```
+
+#### **GET** `/api/notificacoes/usuario/{usuarioId}/estatisticas`
+Obtém estatísticas completas das notificações.
+
+**Response:**
+```json
+{
+  "totalNotificacoes": 25,
+  "notificacoesNaoLidas": 5,
+  "notificacoesLidas": 20,
+  "notificacoesExpiradas": 0,
+  "contaVencendo": 2,
+  "contaVencida": 1,
+  "dividaPendente": 1,
+  "divisaoPendente": 1,
+  "conviteRecebido": 0,
+  "percentualLidas": 80.0
+}
+```
+
+#### **PATCH** `/api/notificacoes/{notificacaoId}/marcar-lida`
+Marca uma notificação específica como lida.
+
+#### **PATCH** `/api/notificacoes/usuario/{usuarioId}/marcar-todas-lidas`
+Marca todas as notificações do usuário como lidas.
+
+#### **POST** `/api/notificacoes/verificar-automaticas`
+Força a execução das verificações automáticas (útil para testes/admin).
+
+#### **GET** `/api/notificacoes/tipos`
+Lista todos os tipos de notificação com ícones.
+
+**Response:**
+```json
+[
+  {
+    "codigo": "CONTA_VENCENDO",
+    "descricao": "Conta próxima do vencimento",
+    "icone": "⏰"
+  },
+  {
+    "codigo": "CONTA_VENCIDA",
+    "descricao": "Conta vencida",
+    "icone": "🚨"
+  }
+]
+```
+
+### Prioridades de Notificação
+
+- **🟢 BAIXA**: Informações gerais (conta criada, pagamento recebido)
+- **🟡 MÉDIA**: Alertas importantes (conta vencendo, dívidas)
+- **🟠 ALTA**: Urgente (conta vence em 1-2 dias)
+- **🔴 URGENTE**: Crítico (contas vencidas)
+
+### Sistema Automático de Notificações
+
+#### Verificações Diárias (09:00h)
+- **Contas vencendo**: Alertas em 1, 3, 7 e 15 dias antes do vencimento
+- **Contas vencidas**: Alertas em 1, 3, 7, 15, 30 dias e múltiplos de 30 dias após vencimento
+
+#### Verificações Semanais (Domingos)
+- **Dívidas pendentes**: Lembrete semanal de dívidas em aberto
+- **Divisões pendentes**: Lembrete semanal de divisões não pagas
+
+#### Limpeza Automática (Domingos 02:00h)
+- **Notificações expiradas**: Remove automaticamente notificações com mais de 30 dias
+
+### Funcionalidades de Notificação
+
+✅ **Notificações automáticas baseadas em cronograma**
+✅ **Sistema de prioridades com cores visuais**
+✅ **Prevenção de spam com controle de duplicatas**
+✅ **Estatísticas completas de atividade**
+✅ **Integração com todos os módulos do sistema**
+✅ **Notificações em tempo real para ações do usuário**
+✅ **Sistema de expiração automática**
+✅ **Filtros por tipo e status de leitura**
+
+### Cenário Completo: Sistema de Notificações
+
+1. **Configuração inicial:**
+```bash
+# Usuário recebe notificação ao criar conta
+curl -X POST http://localhost:8080/api/contas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "descricao": "Conta de luz",
+    "valor": 150.00,
+    "vencimento": "2025-08-10",
+    "criadorId": 1
+  }'
+```
+
+2. **Verificar notificações:**
+```bash
+curl -X GET http://localhost:8080/api/notificacoes/usuario/1/contador
+# Resposta: {"naoLidas": 1, "temNovas": true}
+```
+
+3. **Executar verificações automáticas:**
+```bash
+curl -X POST http://localhost:8080/api/notificacoes/verificar-automaticas
+```
+
+4. **Visualizar notificações por prioridade:**
+```bash
+curl -X GET http://localhost:8080/api/notificacoes/usuario/1/tipo/CONTA_VENCENDO
+```
+
+**Resultado:**
+- ⏰ **Alertas automáticos** baseados em datas
+- 🔔 **Notificações em tempo real** para ações
+- 📊 **Dashboard completo** com estatísticas
+- 🎯 **Sistema inteligente** que evita spam
+- ⚡ **Performance otimizada** com limpeza automática

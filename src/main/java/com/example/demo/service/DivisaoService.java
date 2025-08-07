@@ -26,6 +26,7 @@ public class DivisaoService {
     private final DivisaoRepository divisaoRepository;
     private final ContaService contaService;
     private final UsuarioService usuarioService;
+    private final NotificacaoService notificacaoService;
     
     @Transactional
     public Divisao salvarDivisao(Divisao divisao) {
@@ -141,6 +142,16 @@ public class DivisaoService {
             // Marcar a conta como paga
             contaService.marcarComoPaga(divisao.getConta().getId());
         }
+        
+        // Notificar pagamento recebido ao criador da conta
+        if (!divisao.getUsuario().getId().equals(divisao.getConta().getCriador().getId())) {
+            notificacaoService.notificarPagamentoRecebido(
+                divisao.getConta().getCriador().getId(),
+                divisao.getValor(),
+                divisao.getUsuario().getNome(),
+                divisao.getConta().getDescricao()
+            );
+        }
     }
     
     // RF10: Método aprimorado para marcar pagamento com detalhes
@@ -165,6 +176,16 @@ public class DivisaoService {
         if (todasPagas) {
             // Marcar a conta como paga
             contaService.marcarComoPaga(divisao.getConta().getId());
+        }
+        
+        // Notificar pagamento recebido ao criador da conta
+        if (!divisao.getUsuario().getId().equals(divisao.getConta().getCriador().getId())) {
+            notificacaoService.notificarPagamentoRecebido(
+                divisao.getConta().getCriador().getId(),
+                divisao.getValor(),
+                divisao.getUsuario().getNome(),
+                divisao.getConta().getDescricao()
+            );
         }
     }
     

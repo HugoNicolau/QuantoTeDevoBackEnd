@@ -27,4 +27,7 @@ public interface DividaRepository extends JpaRepository<Divida, Long> {
     
     @Query("SELECT d FROM Divida d WHERE (d.usuarioDevedor.id = :usuarioId OR d.usuarioCredor.id = :usuarioId) AND d.paga = :paga")
     List<Divida> findByUsuarioIdAndPaga(@Param("usuarioId") Long usuarioId, @Param("paga") Boolean paga);
+    
+    // Métodos para notificações automáticas
+    List<Divida> findByPagaFalse();
 }

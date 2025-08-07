@@ -41,4 +41,9 @@ public interface ContaRepository extends JpaRepository<Conta, Long> {
     List<Conta> findByGrupoAndVencimentoBetween(@Param("grupo") Grupo grupo, 
                                                @Param("inicio") LocalDate inicio, 
                                                @Param("fim") LocalDate fim);
+    
+    // Métodos para notificações automáticas
+    List<Conta> findByVencimentoAndPagaFalse(LocalDate vencimento);
+    
+    List<Conta> findByVencimentoBeforeAndPagaFalse(LocalDate data);
 }
