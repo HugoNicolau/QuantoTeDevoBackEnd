@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.DivisaoContaDTO;
+import com.example.demo.dto.DividirPorcentagemDTO;
+import com.example.demo.dto.DivisaoPorcentualDTO;
 import com.example.demo.dto.MarcarPagamentoDTO;
 import com.example.demo.exception.NegocioException;
 import com.example.demo.exception.RecursoNaoEncontradoException;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -157,6 +160,56 @@ public class DivisaoService {
         if (todasPagas) {
             // Marcar a conta como paga
             contaService.marcarComoPaga(divisao.getConta().getId());
+        }
+    }
+    
+    @Transactional
+    public void dividirContaPorPorcentagem(DividirPorcentagemDTO dividirDTO) {
+        Conta conta = contaService.encontrarContaPorId(dividirDTO.getContaId());
+        
+        // Validar se a conta já possui divisões
+        List<Divisao> divisoesExistentes = divisaoRepository.findByConta(conta);
+        if (!divisoesExistentes.isEmpty()) {
+            throw new NegocioException("Esta conta já possui divisões. Para redividir, remova as divisões existentes primeiro.");
+        }
+        
+        // Validar se a soma dos percentuais é 100% (1.0)
+        BigDecimal somaPercentuais = dividirDTO.getDivisoes().stream()
+                .map(DivisaoPorcentualDTO::getPercentual)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        if (somaPercentuais.compareTo(BigDecimal.ONE) != 0) {
+            throw new NegocioException("A soma dos percentuais deve ser exatamente 100% (1.0). " +
+                "Soma atual: " + somaPercentuais.multiply(new BigDecimal("100")) + "%");
+        }
+        
+        // Criar divisões baseadas nos percentuais
+        BigDecimal valorTotal = conta.getValor();
+        BigDecimal somaValoresCalculados = BigDecimal.ZERO;
+        
+        for (int i = 0; i < dividirDTO.getDivisoes().size(); i++) {
+            DivisaoPorcentualDTO divisaoDTO = dividirDTO.getDivisoes().get(i);
+            Usuario usuario = usuarioService.encontrarUsuarioPorId(divisaoDTO.getUsuarioId());
+            
+            BigDecimal valorDivisao;
+            
+            // Para o último usuário, calcular o valor restante para evitar problemas de arredondamento
+            if (i == dividirDTO.getDivisoes().size() - 1) {
+                valorDivisao = valorTotal.subtract(somaValoresCalculados);
+            } else {
+                valorDivisao = valorTotal.multiply(divisaoDTO.getPercentual())
+                        .setScale(2, RoundingMode.HALF_UP);
+                somaValoresCalculados = somaValoresCalculados.add(valorDivisao);
+            }
+            
+            Divisao novaDivisao = Divisao.builder()
+                    .conta(conta)
+                    .usuario(usuario)
+                    .valor(valorDivisao)
+                    .pago(false)
+                    .build();
+            
+            divisaoRepository.save(novaDivisao);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.DivisaoContaDTO;
+import com.example.demo.dto.DividirPorcentagemDTO;
 import com.example.demo.dto.MarcarPagamentoDTO;
 import com.example.demo.model.Divisao;
 import com.example.demo.service.DivisaoService;
@@ -32,6 +33,12 @@ public class DivisaoController {
             @RequestBody List<Long> usuarioIds) {
         divisaoService.dividirContaIgualmente(contaId, usuarioIds);
         return ResponseEntity.ok("Conta dividida igualmente com sucesso!");
+    }
+    
+    @PostMapping("/dividir-porcentagem")
+    public ResponseEntity<String> dividirContaPorPorcentagem(@Valid @RequestBody DividirPorcentagemDTO dividirDTO) {
+        divisaoService.dividirContaPorPorcentagem(dividirDTO);
+        return ResponseEntity.ok("Conta dividida por porcentagem com sucesso!");
     }
     
     @GetMapping("/conta/{contaId}")

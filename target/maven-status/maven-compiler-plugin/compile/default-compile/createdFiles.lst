@@ -1,8 +1,10 @@
 com/example/demo/exception/RecursoNaoEncontradoException.class
 com/example/demo/dto/AmizadeDTO$AmizadeDTOBuilder.class
+com/example/demo/dto/DivisaoPorcentualDTO.class
 com/example/demo/model/Amizade$AmizadeBuilder.class
 com/example/demo/model/Divisao$DivisaoBuilder.class
 com/example/demo/service/ContaService.class
+com/example/demo/dto/DividirPorcentagemDTO$DividirPorcentagemDTOBuilder.class
 com/example/demo/exception/GlobalExceptionHandler.class
 com/example/demo/model/Compra$CompraBuilder.class
 com/example/demo/controller/GrupoController.class
@@ -40,6 +42,7 @@ com/example/demo/dto/DivisaoContaDTO$DivisaoUsuarioDTO.class
 com/example/demo/dto/SolicitarAmizadeDTO.class
 com/example/demo/dto/ItemCompraDTO$ItemCompraDTOBuilder.class
 com/example/demo/model/Divida.class
+com/example/demo/dto/DividirPorcentagemDTO.class
 com/example/demo/model/Compra.class
 com/example/demo/dto/GrupoDTO.class
 com/example/demo/dto/CriarCompraDTO$CriarItemCompraDTO.class
@@ -64,6 +67,7 @@ com/example/demo/dto/CriarGrupoDTO$CriarGrupoDTOBuilder.class
 com/example/demo/dto/MarcarPagamentoDTO.class
 com/example/demo/model/StatusAmizade.class
 com/example/demo/dto/ContaDTO$ContaDTOBuilder.class
+com/example/demo/dto/DivisaoPorcentualDTO$DivisaoPorcentualDTOBuilder.class
 com/example/demo/service/AmizadeService.class
 com/example/demo/dto/CriarCompraDTO.class
 com/example/demo/repository/GrupoRepository.class

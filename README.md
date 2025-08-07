@@ -160,6 +160,7 @@ Lista contas associadas a um grupo.
 - **RF13**: Compras com múltiplos itens
 - **RF14**: Sistema de grupos para divisão recorrente
 - **RF15**: Gerenciamento de membros de grupos
+- **RF16**: Divisão automática por porcentagem
 
 ## 🔗 Documentação das APIs
 
@@ -446,6 +447,35 @@ Marca uma divisão como paga.
   "formaPagamento": "PIX"
 }
 ```
+
+#### **POST** `/api/divisoes/dividir-porcentagem`
+Divide uma conta automaticamente baseada em porcentagens.
+
+**Request Body:**
+```json
+{
+  "contaId": 1,
+  "divisoes": [
+    {"usuarioId": 1, "percentual": 0.5},
+    {"usuarioId": 2, "percentual": 0.3},
+    {"usuarioId": 3, "percentual": 0.2}
+  ]
+}
+```
+
+**Response:**
+```json
+"Conta dividida por porcentagem com sucesso!"
+```
+
+### Regras da Divisão por Porcentagem
+
+- ✅ **Soma dos percentuais deve ser exatamente 100% (1.0)**
+- ✅ **Percentuais aceitos de 0.01 a 1.0 (1% a 100%)**
+- ✅ **Até 4 casas decimais de precisão**
+- ✅ **Último usuário recebe valor restante para evitar erros de arredondamento**
+- ✅ **Validação se conta já possui divisões**
+- ✅ **Valores calculados automaticamente baseados no valor total da conta**
 
 ---
 
@@ -909,6 +939,44 @@ curl -X POST http://localhost:8080/api/contas \
 ```bash
 curl -X GET http://localhost:8080/api/contas/grupo/1
 ```
+
+### Cenário Completo: Divisão por Porcentagem
+
+1. **Criar conta para dividir:**
+```bash
+curl -X POST http://localhost:8080/api/contas \
+  -H "Content-Type: application/json" \
+  -d '{
+    "descricao": "Jantar no restaurante",
+    "valor": 100.00,
+    "vencimento": "2025-08-15",
+    "criadorId": 1
+  }'
+```
+
+2. **Dividir por porcentagem:**
+```bash
+curl -X POST http://localhost:8080/api/divisoes/dividir-porcentagem \
+  -H "Content-Type: application/json" \
+  -d '{
+    "contaId": 1,
+    "divisoes": [
+      {"usuarioId": 1, "percentual": 0.5},
+      {"usuarioId": 2, "percentual": 0.3},
+      {"usuarioId": 3, "percentual": 0.2}
+    ]
+  }'
+```
+
+3. **Verificar divisões criadas:**
+```bash
+curl -X GET http://localhost:8080/api/divisoes/conta/1
+```
+
+**Resultado:**
+- Ana: R$ 50,00 (50% de R$ 100,00)
+- Bruno: R$ 30,00 (30% de R$ 100,00)
+- Carlos: R$ 20,00 (20% de R$ 100,00)
 
 ### Cenário Completo: Compra em Grupo
 

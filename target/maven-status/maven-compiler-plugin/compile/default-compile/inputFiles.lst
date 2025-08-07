@@ -14,7 +14,9 @@
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/CriarCompraDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/CriarGrupoDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/DividaDTO.java
+/home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/DividirPorcentagemDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/DivisaoContaDTO.java
+/home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/DivisaoPorcentualDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/GerenciarMembrosDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/GrupoDTO.java
 /home/hugo/modelagem-de-sistemas/QuantoTeDevoBackEnd/src/main/java/com/example/demo/dto/ItemCompraDTO.java
