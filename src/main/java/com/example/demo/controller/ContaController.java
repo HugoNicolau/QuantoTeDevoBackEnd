@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -19,6 +20,14 @@ import java.util.List;
 public class ContaController {
     
     private final ContaService contaService;
+    
+    @GetMapping
+    public ResponseEntity<List<ContaDTO>> listarContas(HttpServletRequest request) {
+        // Pega o usuário autenticado do contexto de segurança
+        Long usuarioId = (Long) request.getAttribute("userId");
+        List<ContaDTO> contas = contaService.listarContasDoUsuario(usuarioId);
+        return ResponseEntity.ok(contas);
+    }
     
     @PostMapping
     public ResponseEntity<ContaDTO> criarConta(@Valid @RequestBody ContaDTO contaDTO) {
@@ -82,6 +91,12 @@ public class ContaController {
     @PatchMapping("/{id}/marcar-vencida")
     public ResponseEntity<ContaDTO> marcarComoVencida(@PathVariable Long id) {
         ContaDTO contaAtualizada = contaService.marcarComoVencida(id);
+        return ResponseEntity.ok(contaAtualizada);
+    }
+    
+    @PatchMapping("/{id}/marcar-pendente")
+    public ResponseEntity<ContaDTO> marcarComoPendente(@PathVariable Long id) {
+        ContaDTO contaAtualizada = contaService.marcarComoPendente(id);
         return ResponseEntity.ok(contaAtualizada);
     }
     

@@ -20,7 +20,7 @@ O servidor estará disponível em `http://localhost:8080`
 - **RF06**: Criação de dívidas diretas
 - **RF07**: Listagem de dívidas
 - **RF08**: Pagamento de dívidas
-- **R---
+
 
 ### 👥 Sistema de Grupos (`/api/grupos`)
 
@@ -154,19 +154,19 @@ Lista contas associadas a um grupo.
 ---
 
 ### 👥 Sistema de Amizades (`/api/amizades`)**: Visualização de saldo devedor/credor
-- **RF10**: Histórico de transações
-- **RF11**: Sistema de amizades (solicitação, aceitação, listagem)
-- **RF12**: Bloqueio e remoção de amigos
-- **RF13**: Compras com múltiplos itens
-- **RF14**: Sistema de grupos para divisão recorrente
-- **RF15**: Gerenciamento de membros de grupos
-- **RF16**: Divisão automática por porcentagem
-- **RF17**: Marcar contas como vencidas manualmente
-- **RF18**: Sistema de convites para não-amigos
+-  Histórico de transações
+-  Sistema de amizades (solicitação, aceitação, listagem)
+-  Bloqueio e remoção de amigos
+-  Compras com múltiplos itens
+-  Sistema de grupos para divisão recorrente
+-  Gerenciamento de membros de grupos
+-  Divisão automática por porcentagem
+-  Marcar contas como vencidas manualmente
+-  Sistema de convites para não-amigos
 
 ## 🔗 Documentação das APIs
 
-### � Autenticação (`/auth`)
+### 🔐 Autenticação (`/auth`)
 
 #### **POST** `/auth/register`
 Registra um novo usuário e retorna token JWT.
@@ -253,19 +253,58 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
 }
 ```
 
+### Como usar a autenticação
+
+1. **Registre um novo usuário:**
+```bash
+curl -X POST http://localhost:8080/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nome": "Seu Nome",
+    "email": "seu@email.com", 
+    "senha": "suasenha123",
+    "chavePix": "seu@pix.com"
+  }'
+```
+
+2. **Faça login para obter o token:**
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "seu@email.com",
+    "senha": "suasenha123"
+  }'
+```
+
+3. **Use o token nas requisições:**
+```bash
+curl -X GET http://localhost:8080/api/usuarios \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
+4. **Para acessar suas contas:**
+```bash
+# O userId é retornado no login
+curl -X GET http://localhost:8080/api/contas/usuario/1 \
+  -H "Authorization: Bearer SEU_TOKEN_AQUI"
+```
+
 ---
 
-### �👤 Usuários (`/api/usuarios`)
+### 👤 Usuários (`/api/usuarios`)
 
-**⚠️ Nota:** Todas as rotas `/api/**` agora requerem autenticação com Bearer Token.
+**⚠️ Nota:** Todas as rotas `/api/**` agora requerem autenticação com Bearer Token, exceto `/api/health`.
 
 **Headers obrigatórios:**
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
 ```
 
+**Para obter o token:** Use os endpoints `/auth/register` ou `/auth/login`
+
 #### **POST** `/api/usuarios`
-Cria um novo usuário.
+Cria um novo usuário (sem autenticação - uso interno).
 
 **Request Body:**
 ```json
@@ -451,7 +490,7 @@ Marca uma conta como paga.
 ```
 
 #### **PATCH** `/api/contas/{id}/marcar-vencida` 🆕
-Marca uma conta como vencida manualmente (RF17).
+Marca uma conta como vencida manualmente.
 
 **Comportamento:**
 - Só funciona para contas não pagas (status PENDENTE)
@@ -913,7 +952,7 @@ Bloqueia um usuário (impede futuras solicitações).
 
 ---
 
-### 💌 Sistema de Convites para Não-Amigos (`/api/convites`) - RF18
+### 💌 Sistema de Convites para Não-Amigos (`/api/convites`) 
 
 O sistema de convites permite convidar pessoas que ainda não são usuários ou não são amigos para participar de contas específicas através de links únicos por email.
 
@@ -1255,7 +1294,7 @@ curl -X PATCH http://localhost:8080/api/compras/1/finalizar
 curl -X GET http://localhost:8080/api/dividas/usuario/2/devendo
 ```
 
-### Cenário Completo: Sistema de Convites (RF18)
+### Cenário Completo: Sistema de Convites 
 
 1. **Criar usuário e conta:**
 ```bash
@@ -1326,7 +1365,7 @@ curl -X GET http://localhost:8080/api/divisoes/conta/1
 
 ---
 
-### 🔔 Sistema de Notificações (`/api/notificacoes`) - RF15/RF19
+### 🔔 Sistema de Notificações (`/api/notificacoes`) 
 
 O sistema de notificações oferece alertas automáticos e personalizados sobre vencimentos, pagamentos e atividades financeiras.
 

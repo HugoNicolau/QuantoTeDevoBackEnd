@@ -173,6 +173,17 @@ public class ContaService {
     }
     
     @Transactional
+    public ContaDTO marcarComoPendente(Long id) {
+        Conta conta = contaRepository.findById(id)
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Conta", id));
+        
+        conta.setPaga(false);
+        conta.setStatus(StatusConta.PENDENTE);
+        Conta contaAtualizada = contaRepository.save(conta);
+        return converterParaDTO(contaAtualizada);
+    }
+    
+    @Transactional
     public void deletarConta(Long id) {
         if (!contaRepository.existsById(id)) {
             throw new RecursoNaoEncontradoException("Conta", id);
