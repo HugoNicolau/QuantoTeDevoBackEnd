@@ -26,7 +26,103 @@ O servidor estará disponível em `http://localhost:8080`
 
 ## 🔗 Documentação das APIs
 
-### 👤 Usuários (`/api/usuarios`)
+### � Autenticação (`/auth`)
+
+#### **POST** `/auth/register`
+Registra um novo usuário e retorna token JWT.
+
+**Request Body:**
+```json
+{
+  "nome": "João Silva",
+  "email": "joao@email.com",
+  "senha": "senha123",
+  "chavePix": "joao@pix.com"
+}
+```
+
+**Response:**
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+    "usuario": {
+      "id": 1,
+      "nome": "João Silva",
+      "email": "joao@email.com",
+      "chavePix": "joao@pix.com"
+    }
+  },
+  "message": "Usuário registrado com sucesso"
+}
+```
+
+#### **POST** `/auth/login`
+Autentica um usuário e retorna token JWT.
+
+**Request Body:**
+```json
+{
+  "email": "joao@email.com",
+  "senha": "senha123"
+}
+```
+
+**Response:**
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5...",
+    "usuario": {
+      "id": 1,
+      "nome": "João Silva",
+      "email": "joao@email.com",
+      "chavePix": "joao@pix.com"
+    }
+  },
+  "message": "Login realizado com sucesso"
+}
+```
+
+#### **POST** `/auth/logout`
+Realiza logout (no frontend, remove o token do localStorage).
+
+**Response:**
+```json
+{
+  "data": null,
+  "message": "Logout realizado com sucesso"
+}
+```
+
+#### **POST** `/auth/refresh`
+Renova um token JWT que está expirando.
+
+**Headers:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+```
+
+**Response:**
+```json
+{
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5_NEW_TOKEN..."
+  },
+  "message": "Token renovado com sucesso"
+}
+```
+
+---
+
+### �👤 Usuários (`/api/usuarios`)
+
+**⚠️ Nota:** Todas as rotas `/api/**` agora requerem autenticação com Bearer Token.
+
+**Headers obrigatórios:**
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5...
+```
 
 #### **POST** `/api/usuarios`
 Cria um novo usuário.
