@@ -43,7 +43,6 @@ public class CriarLinkPagamentoDTO {
     private String criadoPor;
     
     @NotNull(message = "Data de vencimento é obrigatória")
-    @Future(message = "Data de vencimento deve ser no futuro")
     private LocalDate dataVencimento;
     
     // Opcional - se não informado, usa 30 dias
