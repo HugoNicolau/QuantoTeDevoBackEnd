@@ -33,6 +33,8 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/api/health").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
+                // NOVAS ROTAS PÚBLICAS para pagamentos externos
+                .requestMatchers("/api/pagamentos-externos/public/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().authenticated()
             )

@@ -276,4 +276,27 @@ public class NotificacaoService {
         criarNotificacaoComReferencia(usuarioId, TipoNotificacao.CONTA_CRIADA, titulo, mensagem, 
             PrioridadeNotificacao.BAIXA, contaId, "CONTA");
     }
+    
+    @Async
+    @Transactional
+    public void notificarLinkPagamentoCriado(Long usuarioId, String linkId, String nomeParticipante, BigDecimal valor) {
+        String titulo = "🔗 Link de pagamento criado";
+        String mensagem = String.format("Link criado para %s - R$ %.2f. Compartilhe o link para receber o pagamento.", 
+            nomeParticipante, valor);
+        
+        criarNotificacaoComReferencia(usuarioId, TipoNotificacao.SISTEMA, titulo, mensagem, 
+            PrioridadeNotificacao.BAIXA, null, "PAGAMENTO_EXTERNO");
+    }
+    
+    @Async
+    @Transactional
+    public void notificarPagamentoExternoConfirmado(Long usuarioId, String linkId, String nomeParticipante, 
+                                                   BigDecimal valor, String formaPagamento) {
+        String titulo = "💰 Pagamento externo confirmado";
+        String mensagem = String.format("%s confirmou o pagamento de R$ %.2f via %s", 
+            nomeParticipante, valor, formaPagamento);
+        
+        criarNotificacaoComReferencia(usuarioId, TipoNotificacao.PAGAMENTO_RECEBIDO, titulo, mensagem, 
+            PrioridadeNotificacao.MEDIA, null, "PAGAMENTO_EXTERNO");
+    }
 }

@@ -1539,3 +1539,186 @@ curl -X GET http://localhost:8080/api/notificacoes/usuario/1/tipo/CONTA_VENCENDO
 - 📊 **Dashboard completo** com estatísticas
 - 🎯 **Sistema inteligente** que evita spam
 - ⚡ **Performance otimizada** com limpeza automática
+
+---
+
+### 💳 Sistema de Pagamentos Externos (`/api/pagamentos-externos`) 
+
+O sistema de pagamentos externos permite criar links únicos para pessoas que não possuem conta no sistema confirmarem pagamentos de suas partes nas despesas.
+
+#### **POST** `/api/pagamentos-externos/criar-link`
+Cria um link de pagamento único (ROTA AUTENTICADA).
+
+**Request Body:**
+```json
+{
+  "nomeParticipante": "João Silva",
+  "valor": 25.50,
+  "descricaoDespesa": "Jantar no restaurante",
+  "contaId": 123,
+  "criadoPorId": 456,
+  "criadoPor": "Maria Santos",
+  "dataVencimento": "2025-01-15",
+  "diasValidade": 30,
+  "observacoes": "Valor referente ao prato principal"
+}
+```
+
+**Response:**
+```json
+{
+  "linkId": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "url": "/pagamento/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "urlCompleta": "http://localhost:8080/pagamento/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+}
+```
+
+#### **GET** `/api/pagamentos-externos/public/{id}`
+Busca informações do pagamento pelo link (ROTA PÚBLICA).
+
+**Response:**
+```json
+{
+  "id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "nomeParticipante": "João Silva",
+  "valor": 25.50,
+  "descricaoDespesa": "Jantar no restaurante",
+  "criadoPor": "Maria Santos",
+  "dataCriacao": "2025-01-10T14:30:00",
+  "dataVencimento": "2025-01-15",
+  "pago": false,
+  "dataPagamento": null,
+  "formaPagamento": null,
+  "observacoes": "Valor referente ao prato principal",
+  "expirado": false,
+  "vencido": false,
+  "diasParaVencer": 5,
+  "horasParaExpirar": 720
+}
+```
+
+#### **POST** `/api/pagamentos-externos/public/{id}/confirmar`
+Confirma o pagamento (ROTA PÚBLICA).
+
+**Request Body:**
+```json
+{
+  "formaPagamento": "PIX",
+  "observacoes": "Pago via PIX às 15:30"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6",
+  "nomeParticipante": "João Silva",
+  "valor": 25.50,
+  "descricaoDespesa": "Jantar no restaurante",
+  "criadoPor": "Maria Santos",
+  "pago": true,
+  "dataPagamento": "2025-01-10T15:35:00",
+  "formaPagamento": "PIX",
+  "observacoes": "Valor referente ao prato principal\n\nPagamento: Pago via PIX às 15:30"
+}
+```
+
+#### **GET** `/api/pagamentos-externos/conta/{contaId}`
+Lista pagamentos externos de uma conta (ROTA AUTENTICADA).
+
+#### **GET** `/api/pagamentos-externos/usuario`
+Lista todos os pagamentos do usuário autenticado (ROTA AUTENTICADA).
+
+#### **GET** `/api/pagamentos-externos/conta/{contaId}/pendentes`
+Lista pagamentos pendentes de uma conta (ROTA AUTENTICADA).
+
+#### **GET** `/api/pagamentos-externos/estatisticas`
+Obtém estatísticas dos pagamentos do usuário (ROTA AUTENTICADA).
+
+**Response:**
+```json
+{
+  "totalLinks": 15,
+  "linksPagos": 12,
+  "linksPendentes": 2,
+  "linksExpirados": 1,
+  "linksVencidos": 0,
+  "percentualPagos": 80.0
+}
+```
+
+#### **GET** `/api/pagamentos-externos/{id}`
+Busca pagamento específico para o criador (ROTA AUTENTICADA).
+
+#### **POST** `/api/pagamentos-externos/limpar-expirados`
+Limpa links expirados automaticamente (ROTA ADMINISTRATIVA).
+
+### Funcionalidades do Sistema de Pagamentos Externos
+
+✅ **Links únicos e seguros** com IDs de 32 caracteres
+✅ **Rotas públicas** para acesso sem cadastro
+✅ **Sistema de expiração** configurável (padrão 30 dias)
+✅ **Confirmação simples** com forma de pagamento
+✅ **Notificações automáticas** para criador do link
+✅ **Estatísticas completas** de uso
+✅ **Integração com contas** existentes
+✅ **Validações de segurança** e permissões
+✅ **Observações combinadas** (link + pagamento)
+✅ **Status de vencimento** e expiração
+
+### Regras de Negócio - Pagamentos Externos
+
+- ✅ **Apenas criador da conta pode gerar links**
+- ✅ **Links têm validade configurável (padrão 30 dias)**
+- ✅ **IDs únicos e seguros (UUID sem hífens)**
+- ✅ **Confirmação única por link**
+- ✅ **Validação de expiração em tempo real**
+- ✅ **Observações são combinadas e preservadas**
+- ✅ **Notificações automáticas para criador**
+- ✅ **Limpeza automática de links expirados**
+
+### Cenário Completo: Pagamentos Externos
+
+1. **Criar link de pagamento:**
+```bash
+curl -X POST http://localhost:8080/api/pagamentos-externos/criar-link \
+  -H "Authorization: Bearer {token}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nomeParticipante": "João Silva",
+    "valor": 35.50,
+    "descricaoDespesa": "Pizza e refrigerante",
+    "contaId": 1,
+    "criadoPorId": 1,
+    "criadoPor": "Ana Silva",
+    "dataVencimento": "2025-08-20"
+  }'
+```
+
+2. **Pessoa externa acessa link:**
+```bash
+curl -X GET http://localhost:8080/api/pagamentos-externos/public/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6
+```
+
+3. **Confirmar pagamento (público):**
+```bash
+curl -X POST http://localhost:8080/api/pagamentos-externos/public/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6/confirmar \
+  -H "Content-Type: application/json" \
+  -d '{
+    "formaPagamento": "PIX",
+    "observacoes": "Pago via Pix do Banco ABC"
+  }'
+```
+
+4. **Ver estatísticas (autenticada):**
+```bash
+curl -X GET http://localhost:8080/api/pagamentos-externos/estatisticas \
+  -H "Authorization: Bearer {token}"
+```
+
+**Resultado:**
+- 🔗 **Link único** gerado e compartilhado
+- 💰 **Pagamento confirmado** sem necessidade de cadastro
+- 🔔 **Criador notificado** automaticamente
+- 📊 **Estatísticas atualizadas** em tempo real
+- 🎯 **Sistema profissional** pronto para produção
